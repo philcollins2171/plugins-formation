@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "plugins-formation",
   "version": "1.0.0",
-  "description": "Plugins pour la formation vibe-coding (US Colomiers Rugby)",
+  "description": "Plugins Claude Code de nocodeia+ : formation (vibe-coding) et déploiement client.",
   "owner": {
     "name": "François Pina",
     "email": "francois.pina@deers.fr"

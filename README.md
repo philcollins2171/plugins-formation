@@ -1,6 +1,6 @@
 # plugins-formation
 
-Marketplace de plugins Claude Code pour la **formation vibe-coding**.
+Marketplace de plugins Claude Code de **nocodeia+** : outils de **formation** (vibe-coding) et de **déploiement client**.
 
 > Ressources pédagogiques publiques. Ne contient aucun secret (pas de clé API, pas de
 > token) : tout cela reste dans les fichiers `.env`, jamais dans un plugin.
@@ -12,16 +12,27 @@ Marketplace de plugins Claude Code pour la **formation vibe-coding**.
 | `mcp-unipile-grader` | Vérifie la conformité d'un serveur MCP Unipile (connecteur LinkedIn) à la spec de référence, indépendamment de la stack. Fournit le skill `verifier-conformite-mcp-unipile` et la commande `/test-mcp`. |
 | `second-cerveau` | Initialise un Second Cerveau vierge prêt à déployer chez un client (base de connaissance Cowork). Fournit la commande `/init-second-cerveau`. |
 
-## Installation (à faire une fois par apprenti)
+## Installation
 
-Dans Claude Code :
+Dans Claude Code, ajoute le marketplace une seule fois :
 
 ```
 /plugin marketplace add philcollins2171/plugins-formation
+```
+
+Puis installe le plugin correspondant à ton besoin :
+
+```
+# Apprenti vibe-coding — auto-évaluer son MCP Unipile
 /plugin install mcp-unipile-grader@plugins-formation
+
+# Déployeur / formateur — générer un Second Cerveau client
+/plugin install second-cerveau@plugins-formation
 ```
 
 ## Utilisation
+
+### Plugin `mcp-unipile-grader`
 
 - **Auto-évaluer son rendu** : demande simplement « vérifie la conformité de mon MCP
   Unipile » — le skill `verifier-conformite-mcp-unipile` s'active et te guide.
