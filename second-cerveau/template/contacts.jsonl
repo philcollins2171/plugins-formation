@@ -1,0 +1,3 @@
+// Mini-CRM — une ligne JSON par contact (supprimer ces lignes de commentaire au premier ajout).
+// Format : {"name": "Prénom Nom", "company": "Société", "role": "Fonction", "email": "x@y.fr", "tone": "vouvoiement / tutoiement", "tags": ["client"], "notes": "..."}
+// Le skill /update-memory ajoute et met à jour les contacts automatiquement.

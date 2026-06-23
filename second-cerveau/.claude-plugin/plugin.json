@@ -1,0 +1,10 @@
+{
+  "name": "second-cerveau",
+  "description": "Initialise un Second Cerveau vierge (base de connaissance Cowork) prêt à déployer chez un client : génère l'arborescence, les skills génériques et le premier dossier client.",
+  "version": "1.0.0",
+  "author": {
+    "name": "François Pina",
+    "email": "francois.pina@deers.fr"
+  },
+  "license": "MIT"
+}

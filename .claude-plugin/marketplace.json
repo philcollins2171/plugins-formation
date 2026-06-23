@@ -14,6 +14,13 @@
       "version": "1.0.0",
       "source": "./mcp-unipile-grader",
       "category": "learning"
+    },
+    {
+      "name": "second-cerveau",
+      "description": "Initialise un Second Cerveau vierge (base de connaissance Cowork) prêt à déployer chez un client : arborescence, skills génériques et premier dossier client.",
+      "version": "1.0.0",
+      "source": "./second-cerveau",
+      "category": "productivity"
     }
   ]
 }
