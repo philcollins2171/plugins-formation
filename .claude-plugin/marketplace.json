@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "plugins-formation",
+  "version": "1.0.0",
+  "description": "Plugins pour la formation vibe-coding (US Colomiers Rugby)",
+  "owner": {
+    "name": "François Pina",
+    "email": "francois.pina@deers.fr"
+  },
+  "plugins": [
+    {
+      "name": "mcp-unipile-grader",
+      "description": "Vérifie la conformité d'un serveur MCP Unipile (LinkedIn) à la spec de référence, indépendamment de la stack.",
+      "version": "1.0.0",
+      "source": "./mcp-unipile-grader",
+      "category": "learning"
+    }
+  ]
+}
