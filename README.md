@@ -1,6 +1,6 @@
 # plugins-formation
 
-Marketplace de plugins Claude Code pour la **formation vibe-coding** (US Colomiers Rugby).
+Marketplace de plugins Claude Code pour la **formation vibe-coding**.
 
 > Ressources pédagogiques publiques. Ne contient aucun secret (pas de clé API, pas de
 > token) : tout cela reste dans les fichiers `.env`, jamais dans un plugin.
