@@ -264,3 +264,70 @@ avec *bracket notation* pour les champs imbriqués.
 4. **Clé org dans la réponse** : vérifier qu'aucun outil ne renvoie la clé org au client.
 5. **Stack libre** : Python/FastMCP, Node/SDK, etc. La grille ci-dessus ne dépend
    d'aucune techno — elle teste des comportements observables.
+
+---
+
+## Annexe B - Variante transport stdio (fonctionnement local)
+
+> Le corps de cette spec décrit un proxy MCP en **transport HTTP** (déploiement VPS,
+> OAuth). Un rendu peut aussi viser un **transport stdio** : le serveur tourne en
+> sous-process local, on lui parle en **JSON-RPC délimité par newline** (un message JSON
+> par ligne) sur stdin/stdout, et l'`account_id` est fourni en **argument CLI** au
+> lancement (ex. `node server.js --account-id ABC123`). Pattern Claude Code :
+> `claude mcp add --transport stdio <name> -- <commande> [args...]`.
+>
+> En stdio, **toute la couche HTTP/OAuth disparaît** ; seule la grille réduite ci-dessous
+> s'applique. On la teste avec `/test-mcp --stdio "<commande>" [--account-id <id>]`.
+
+### B.1 Exigences qui RESTENT « DOIT » en stdio
+
+- **1.1-1.5** : interface MCP (list/call) sur stdio ; relais `tools/list` et `tools/call`
+  vers Unipile ; clé org **jamais** exposée au client ; outil synthétique
+  `get_current_account` qui renvoie l'`account_id` de l'arg CLI **sans appeler Unipile**.
+- **2.1-2.5** : 1 process ↔ 1 `account_id` (celui de l'arg CLI) ; **`account_id`
+  forcé/écrasé** sur chaque appel (LE test décisif, il reste) ; réécriture de la liste des
+  comptes ; `DELETE` compte bloqué ; garde SSRF sur l'hôte Unipile.
+- **6.1-6.2** : séquence d'init MCP vers l'upstream + parsing SSE/JSON.
+- **8.3** : secrets jamais loggés (désormais sur **stderr**).
+- **9.1-9.2** : `UNIPILE_API_KEY` en variable d'env ; `UNIPILE_BASE_URL` validé anti-SSRF.
+- **10.1** : build/run reproductible.
+
+### B.2 Exigences « DOIT » spécifiques au mode stdio (nouvelles)
+
+| # | Exigence | Niveau |
+|---|---|---|
+| S.A | L'`account_id` est fourni en **argument CLI** au lancement du process. | DOIT |
+| S.B | Les logs sont écrits **exclusivement sur stderr** ; stdout ne contient que du JSON-RPC valide (sinon le flux MCP est cassé). | DOIT |
+| S.C | Le serveur démarre et **répond à `initialize`** sur stdio (remplace 10.2 `/health`). | DOIT |
+
+### B.3 Exigences CADUQUES en stdio (non vérifiées)
+
+- Toute la section **3a OAuth** (3.1-3.10 : PKCE, DCR, `.well-known`, `/authorize`,
+  `/token`, 401 + `WWW-Authenticate`).
+- **3.11/3.12** header direct → remplacé par l'arg CLI (S.A) ; **3.13-3.16** cycle de vie
+  des tokens (plus de tokens).
+- Section **4** endpoints HTTP (dont `/health`) ; **5.1/5.2/5.3** sessions HTTP.
+- **8.1** limite payload HTTP, **8.2** rate-limit OAuth, **8.4** CSP, **8.6** TTL DCR.
+- **9.3** `PORT`, **9.4** `TOKENS_FILE`.
+- **10.2** `/health` → remplacé par S.C.
+
+### B.4 Checklist de conformité - mode stdio
+
+**Automatique** (script `--stdio`, sans creds Unipile : lancé avec `UNIPILE_BASE_URL`
+injoignable pour prouver l'absence d'appel réseau)
+- [ ] (S.C/10.2) Le serveur répond à `initialize` sur stdio
+- [ ] (1.5) `tools/list` contient `get_current_account`
+- [ ] (1.5) `get_current_account` renvoie un `account_id` non vide **hors-ligne** (valeur
+      exacte si `--account-id` fourni)
+- [ ] (1.4/8.3) La clé org n'apparaît pas dans les réponses stdout
+- [ ] (S.B) stdout ne contient que du JSON-RPC (logs sur stderr)
+
+**Manuel / revue de code** (nécessite de vraies creds Unipile)
+- [ ] (2.2) `account_id` forcé : un `account_id` étranger dans un appel est écrasé
+- [ ] (2.3) liste des comptes réécrite vers le seul compte de session
+- [ ] (2.4) `DELETE` compte bloqué
+- [ ] (2.5) garde SSRF sur l'hôte Unipile
+- [ ] (1.2/1.3) relais réel `tools/list` + `tools/call` vers Unipile
+- [ ] (6.1/6.2) séquence d'init MCP upstream + parsing SSE/JSON
+- [ ] (S.A) `account_id` bien fourni en argument CLI
+- [ ] (9.1/9.2) `UNIPILE_API_KEY` en env, `UNIPILE_BASE_URL` validé

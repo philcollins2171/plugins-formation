@@ -31,12 +31,18 @@ Lis `spec-mcp-unipile.md` en entier avant de juger un rendu.
 
 1. **Localiser le rendu de l'apprenti** : demander le chemin du projet ou l'URL du
    serveur en cours d'exécution.
-2. **Lancer les tests automatisables** : exécuter le script `scripts/test-conformite.sh`
-   (ou la slash command `/test-mcp <URL>`) qui couvre les vérifications sans
-   authentification (santé, 401, métadonnées OAuth, rejet PKCE `plain`).
-3. **Passer la checklist** de `spec-mcp-unipile.md` (annexe), point par point. Pour les
-   exigences que le script ne couvre pas (isolation `account_id`, blocage `DELETE`,
-   persistance des tokens), inspecter le code ou tester manuellement.
+2. **Identifier le transport** et lancer les tests automatisables avec le bon mode :
+   - **HTTP (VPS, OAuth)** : `/test-mcp --http <URL>` (ou `/test-mcp <URL>`). Couvre les
+     vérifications sans authentification (santé, 401, métadonnées OAuth, rejet PKCE
+     `plain`). Grille complète = corps de `spec-mcp-unipile.md`.
+   - **stdio (local, account_id en arg CLI)** : `/test-mcp --stdio "<commande>" [--account-id <id>]`.
+     Couvre le handshake MCP, l'outil synthétique `get_current_account` hors-ligne, la
+     non-fuite de la clé org et la propreté du flux stdout. Grille **réduite** = **Annexe B**
+     de `spec-mcp-unipile.md` (la couche HTTP/OAuth ne s'applique pas).
+3. **Passer la checklist** de `spec-mcp-unipile.md`, point par point : la checklist
+   principale en HTTP, l'**Annexe B** en stdio. Pour les exigences que le script ne couvre
+   pas (isolation `account_id`, blocage `DELETE`, persistance des tokens en HTTP ; relais
+   réel et `account_id` forcé en stdio), inspecter le code ou tester manuellement.
 4. **Restituer un verdict** structuré :
    - exigences **DOIT** satisfaites / manquantes (un rendu n'est conforme que si tous
      les DOIT passent) ;
