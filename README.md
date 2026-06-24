@@ -11,6 +11,10 @@ Marketplace de plugins Claude Code de **nocodeia+** : outils de **formation** (v
 |---|---|
 | `mcp-unipile-grader` | Vérifie la conformité d'un serveur MCP Unipile (connecteur LinkedIn) à la spec de référence, indépendamment de la stack. Fournit le skill `verifier-conformite-mcp-unipile` et la commande `/test-mcp`. |
 | `second-cerveau` | Initialise un Second Cerveau vierge prêt à déployer chez un client (base de connaissance Cowork). Fournit la commande `/init-second-cerveau`. |
+| `mcp-vps-deploy` | Accompagne pas-à-pas (pour non-informaticiens) la mise en ligne d'un MCP sur un VPS Ubuntu vierge : durcissement, NGINX, HTTPS, en reproduisant la config de référence `app.deers.fr`. Fournit le skill `deployer-mcp-sur-vps` et la commande `/deploy-mcp`. |
+
+> Boucle pédagogique complète : **coder** son MCP -> le **tester** (`mcp-unipile-grader`)
+> -> le **déployer** (`mcp-vps-deploy`).
 
 ## Installation
 
@@ -28,6 +32,9 @@ Puis installe le plugin correspondant à ton besoin :
 
 # Déployeur / formateur — générer un Second Cerveau client
 /plugin install second-cerveau@plugins-formation
+
+# Apprenti vibe-coding — déployer son MCP sur son VPS
+/plugin install mcp-vps-deploy@plugins-formation
 ```
 
 ## Utilisation
@@ -64,6 +71,40 @@ inventée : seul le nom du client est renseigné, le reste est rempli côté Cow
 « installe mon cerveau ». Suis ensuite le `GUIDE_DEMARRAGE.md` à la racine du dossier
 généré (Drive -> Project -> Custom Instructions).
 
+### Plugin `mcp-vps-deploy`
+
+Pour l'**apprenti** qui a fini de coder et de tester son MCP et veut le mettre en ligne
+sur **son propre VPS Ubuntu vierge**. Le plugin reproduit la configuration sûre du serveur
+de référence `app.deers.fr` et **explique chaque étape sans jargon** (le public n'est pas
+informaticien).
+
+```
+/deploy-mcp --dns mcp-unipile-groupe3.deers.fr --port 3101 --account deploy --repo https://github.com/groupe3/mon-mcp.git
+```
+
+Les 4 paramètres :
+
+| Paramètre | Exemple | Rôle |
+|---|---|---|
+| `--dns` | `mcp-unipile-groupe3.deers.fr` | l'adresse publique (HTTPS) du MCP |
+| `--port` | `3101` | la porte interne où tourne le MCP (jamais exposée directement) |
+| `--account` | `deploy` | le compte système dédié créé et sécurisé sur le VPS |
+| `--repo` | `https://github.com/...` | le dépôt GitHub du MCP à installer |
+
+Le skill `deployer-mcp-sur-vps` déroule, **une étape à la fois et en validant à chaque
+fois** : vérifications -> durcissement (compte dédié, pare-feu `ufw`, `fail2ban`, SSH sur
+port custom) -> installation du moteur (Node/Python + pm2) -> clone + démarrage du MCP ->
+reverse proxy NGINX + HTTPS Let's Encrypt -> vérification finale. Il enchaîne ensuite
+volontiers sur `/test-mcp` pour contrôler la conformité.
+
+**Prérequis et limites :**
+- L'apprenti arrive avec un **VPS Ubuntu vierge** (le plugin ne provisionne pas le VPS).
+- L'enregistrement **DNS** (sous-domaine `deers.fr` -> IP du VPS) est créé par le
+  **formateur** (clé Gandi côté formateur) ; le plugin se contente de vérifier que le nom
+  pointe bien vers le VPS.
+- Les **secrets** (clé API Unipile, etc.) sont saisis dans le `.env` sur le VPS, jamais
+  commités.
+
 ## Mise à jour
 
 Quand le formateur publie une nouvelle version :
@@ -81,7 +122,8 @@ Quand le formateur publie une nouvelle version :
 3. À chaque correction : bump le champ `version` dans
    `.claude-plugin/marketplace.json` **et** dans le `plugin.json` du plugin concerné
    (`mcp-unipile-grader/.claude-plugin/plugin.json`,
-   `second-cerveau/.claude-plugin/plugin.json`), puis `git push`.
+   `second-cerveau/.claude-plugin/plugin.json`,
+   `mcp-vps-deploy/.claude-plugin/plugin.json`), puis `git push`.
 
 > Garde toujours un `version` explicite : sans lui, chaque commit deviendrait une
 > « version » et se propagerait automatiquement aux apprentis.
@@ -104,13 +146,25 @@ plugins-formation/
 │   │   └── test-mcp.md                   # slash command /test-mcp
 │   └── scripts/
 │       └── test-conformite.sh           # tests curl automatiques
-└── second-cerveau/
+├── second-cerveau/
+│   ├── .claude-plugin/
+│   │   └── plugin.json                  # manifeste du plugin
+│   ├── commands/
+│   │   └── init-second-cerveau.md       # slash command /init-second-cerveau
+│   └── template/                         # kit vierge embarqué (copié chez le client)
+│       ├── ME.md, TOOLS.md, GUIDE_DEMARRAGE.md, ...
+│       ├── skills/                       # assistant, update-memory, ping, self-improve
+│       └── Clients/_template/            # squelette à dupliquer par client
+└── mcp-vps-deploy/
     ├── .claude-plugin/
     │   └── plugin.json                  # manifeste du plugin
     ├── commands/
-    │   └── init-second-cerveau.md       # slash command /init-second-cerveau
-    └── template/                         # kit vierge embarqué (copié chez le client)
-        ├── ME.md, TOOLS.md, GUIDE_DEMARRAGE.md, ...
-        ├── skills/                       # assistant, update-memory, ping, self-improve
-        └── Clients/_template/            # squelette à dupliquer par client
+    │   └── deploy-mcp.md                # slash command /deploy-mcp
+    ├── skills/
+    │   └── deployer-mcp-sur-vps/
+    │       ├── SKILL.md                  # guide pas-à-pas pédagogique
+    │       └── reference-app-deers.md    # config de référence figée
+    └── scripts/                          # scripts idempotents lancés sur le VPS
+        ├── 00-precheck.sh … 99-verify.sh
+        └── templates/nginx-mcp.conf.tmpl
 ```

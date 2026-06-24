@@ -1,0 +1,10 @@
+{
+  "name": "mcp-vps-deploy",
+  "description": "Guide pas-à-pas (pour non-informaticiens) le déploiement d'un serveur MCP Unipile sur un VPS Ubuntu vierge : durcissement, reverse proxy NGINX, HTTPS et mise en ligne, en reproduisant la configuration de référence app.deers.fr.",
+  "version": "1.0.0",
+  "author": {
+    "name": "François Pina",
+    "email": "francois.pina@deers.fr"
+  },
+  "license": "MIT"
+}
