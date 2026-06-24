@@ -1,0 +1,35 @@
+# Reverse proxy pour un MCP - calqué sur mcp-unipile.deers.fr
+# Les marqueurs __MCP_DNS__ et __MCP_PORT__ sont remplacés par 40-nginx-certbot.sh.
+# Au départ ce vhost écoute en HTTP (port 80) ; certbot le bascule ensuite en HTTPS (443)
+# et ajoute la redirection automatique http -> https.
+server {
+    listen 80;
+    server_name __MCP_DNS__;
+
+    # Endpoint principal du MCP (transport HTTP streamable).
+    location / {
+        proxy_pass http://127.0.0.1:__MCP_PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Connection '';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # En-têtes spécifiques au MCP (authentification + session).
+        proxy_set_header Authorization   $http_authorization;
+        proxy_set_header X-Account-Id    $http_x_account_id;
+        proxy_set_header X-Mcp-Secret    $http_x_mcp_secret;
+        proxy_set_header Mcp-Session-Id  $http_mcp_session_id;
+        proxy_pass_header Mcp-Session-Id;
+
+        # Indispensable pour le streaming (SSE) : on ne met rien en tampon.
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 300s;
+    }
+
+    location = /health {
+        proxy_pass http://127.0.0.1:__MCP_PORT__;
+        proxy_http_version 1.1;
+    }
+}
